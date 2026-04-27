@@ -1,0 +1,108 @@
+import { useEffect, useState } from "react";
+import { createUser, getUsers } from "../services/api.js";
+
+function UserManagement() {
+  const [users, setUsers] = useState([]);
+  const [values, setValues] = useState({ username: "", password: "", role: "user" });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      setUsers(await getUsers());
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const updateValue = (event) => {
+    setValues((current) => ({ ...current, [event.target.name]: event.target.value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      await createUser(values);
+      setValues({ username: "", password: "", role: "user" });
+      setMessage("User created.");
+      loadUsers();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="page-section">
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">Admin tools</p>
+          <h1>Create users for the directory.</h1>
+        </div>
+      </div>
+
+      {error && <p className="state-message error-message">{error}</p>}
+      {message && <p className="state-message success-message">{message}</p>}
+
+      <form className="student-form" onSubmit={handleSubmit}>
+        <fieldset>
+          <legend>New user</legend>
+          <div className="form-grid">
+            <label>
+              Username
+              <input name="username" value={values.username} onChange={updateValue} required />
+            </label>
+            <label>
+              Password
+              <input name="password" value={values.password} onChange={updateValue} type="password" minLength="8" required />
+            </label>
+            <label>
+              Role
+              <select name="role" value={values.role} onChange={updateValue}>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <div className="form-actions">
+          <button type="submit" className="button button-primary" disabled={saving}>
+            {saving ? "Creating..." : "Create user"}
+          </button>
+        </div>
+      </form>
+
+      {loading ? (
+        <p className="state-message">Loading users...</p>
+      ) : (
+        <div className="user-table">
+          {users.map((user) => (
+            <div className="user-row" key={user.id || user._id}>
+              <strong>{user.username}</strong>
+              <span>{user.role}</span>
+              <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export default UserManagement;
