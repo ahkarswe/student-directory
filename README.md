@@ -139,174 +139,203 @@ email                 string, optional
 work.jobTitle         string
 work.company          string
 work.department       string
-work.location         string
-work.status           Student | Intern | Full-time | Freelancer
-work.experienceYears  number
-socialLinks.facebook  string
-socialLinks.linkedin  string
-socialLinks.github    string
+# 🎓 UCMS MBA Student Directory
+
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+![Node.js](https://img.shields.io/badge/Node.js-Backend-green)
+![React](https://img.shields.io/badge/React-Frontend-61dafb)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-green)
+![Nginx](https://img.shields.io/badge/Nginx-ReverseProxy-brightgreen)
+
+A **production-ready full-stack student directory system** built with modern web technologies and containerized deployment.
+
+---
+
+## 🚀 Quick Start
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+```
+
+Open in browser:
+
+👉 http://localhost:8080
+
+---
+
+## 🧩 Overview
+
+This system allows managing student profiles with authentication, search, filtering, and image uploads.
+
+### ✨ Key Capabilities
+
+* Secure login & role-based access
+* Full CRUD for student profiles
+* Advanced search & filtering
+* Image upload & storage
+* Pagination & sorting
+* Admin user management
+
+---
+
+## 🏗️ Architecture
+
+```text
+Client Browser
+     ↓
+Nginx (Reverse Proxy)
+     ↓
+Frontend (React - Port 4173)
+     ↓
+Backend API (Node.js - Port 5000)
+     ↓
+MongoDB (Database)
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer      | Technology        |
+| ---------- | ----------------- |
+| Frontend   | React (Vite)      |
+| Backend    | Node.js + Express |
+| Database   | MongoDB           |
+| Deployment | Docker Compose    |
+| Proxy      | Nginx             |
+
+---
+
+## 📸 Screenshots
+
+> Add your screenshots here
+
+```text
+/docs/screenshots/
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+student-directory/
+  backend/
+  frontend/
+  docker-compose.yml
+  .env.example
+  README.md
+```
+
+---
+
+## 🔌 API Endpoints
+
+### Students
+
+```text
+POST   /students
+GET    /students
+GET    /students/:id
+PUT    /students/:id
+DELETE /students/:id (admin)
+```
+
+### Auth
+
+```text
+POST /auth/login
+GET  /auth/users (admin)
+POST /auth/users (admin)
+```
+
+---
+
+## 📊 Data Model
+
+```text
+name                  string
+rollNumber            string (unique)
+phone                 string
+email                 string
+work.company          string
+work.jobTitle         string
 photo                 /uploads/<filename>
-createdAt             date
 ```
 
-## Run With Docker
+---
 
-For the production domain, make sure your DNS `A` record points `ucms.mindgnite.com` to the server public IP.
-
-From this folder in WSL:
-
-```bash
-cp .env.example .env
-docker compose up --build -d
-```
-
-Older Docker Compose installs may use:
-
-```bash
-docker-compose up --build
-```
-
-Then open:
-
-```text
-http://ucms.mindgnite.com
-```
-
-The frontend container is a Node static server bound to server localhost on port `4173` by default. The backend is bound to server localhost on port `5000` for direct API testing:
-
-```text
-http://localhost:4173
-http://localhost:5000
-```
-
-Your host Nginx should receive public traffic for `ucms.mindgnite.com` and proxy to these local container ports.
-
-## Run Locally On This Machine
-
-To run the same Docker stack on `localhost`, use the local Nginx container that ships in `docker-compose.yml`:
-
-```bash
-cp .env.example .env
-docker compose up --build -d
-```
-
-Then open:
-
-```text
-http://localhost:8080
-```
-
-That local proxy forwards `/api` and `/uploads` to the backend container and the app shell to the frontend container.
-
-## Environment Variables
-
-Example values are included in `.env.example` and `backend/.env.example`:
+## ⚙️ Environment Variables
 
 ```env
 MONGO_URI=mongodb://mongo:27017/studentdb
 PORT=5000
 CORS_ORIGIN=http://localhost:8080
 UPLOAD_DIR=/uploads
-FRONTEND_PORT=4173
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=change-this-password
 JWT_SECRET=change-this-to-a-long-random-secret
 ```
 
-Change `ADMIN_PASSWORD` and `JWT_SECRET` before using the app in production.
+---
 
-For local-only Docker testing on the same machine, you can still set `FRONTEND_PORT=3000` and `CORS_ORIGIN=http://localhost:3000` in `.env` if you want to run the frontend directly through Vite instead of the local proxy.
+## 💾 Database Backup & Restore
 
-## Upload Persistence
-
-The backend stores uploaded files in `/uploads`. In local Docker mode, the uploads directory is mounted from `./data/uploads` so it stays inside this workspace and works on any machine.
-
-MongoDB stores data in the named volume `mongo-data`, so student records also persist across restarts.
-
-## Notes For Development
-
-The frontend calls `/api/students`. In production, your host Nginx should proxy `/api` to the backend container and `/uploads` to backend static file serving.
-
-For local Docker runs, the bundled [`nginx/local.conf`](./nginx/local.conf) provides the same proxy behavior on `http://localhost:8080`.
-
-For local non-Docker development, run MongoDB locally or update `MONGO_URI`, then start backend and frontend separately with:
+### Backup
 
 ```bash
-cd backend
-npm install
-npm run dev
-
-cd frontend
-npm install
-npm run dev
+mongodump --uri="mongodb://localhost:27017/studentdb" --out=./backup
 ```
 
-## WSL Deployment Notes
-
-Use these steps when rebuilding from WSL:
+### Restore
 
 ```bash
-cd /path/to/student-directory
-cp .env.example .env
-docker compose down
-docker compose up --build -d
-docker compose ps
+mongorestore --uri="mongodb://localhost:27017" --drop ./backup/studentdb
 ```
 
-The Docker frontend service does not bind public port `80`; it binds to server localhost on `FRONTEND_PORT`. Host Nginx should own public ports `80` and `443`.
+---
 
-## Host Nginx Example
+## 🔐 Security Notes
 
-Use this on the host machine, not inside the frontend container:
+* Do not commit `.env` files
+* Change default admin credentials
+* Use strong JWT secrets
+* Restrict MongoDB to localhost
 
-```nginx
-server {
-  listen 80;
-  server_name ucms.mindgnite.com;
+---
 
-  client_max_body_size 6m;
+## 🌐 Production Deployment
 
-  location /api/ {
-    proxy_pass http://127.0.0.1:5000/;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-  }
+1. Point domain to server IP
+2. Configure host Nginx
+3. Run Docker stack
+4. Enable HTTPS (Let's Encrypt)
 
-  location /uploads/ {
-    proxy_pass http://127.0.0.1:5000/uploads/;
-    proxy_set_header Host $host;
-  }
+---
 
-  location / {
-    proxy_pass http://127.0.0.1:4173;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-  }
-}
-```
+## 📌 Use Cases
 
-## Later HTTPS With Let's Encrypt
+* University student directory
+* Internal employee directory
+* Full-stack learning project
+* Docker/Nginx deployment practice
 
-The app is currently configured for:
+---
 
-```text
-http://ucms.mindgnite.com
-```
+## 🧠 Author Notes
 
-When you switch to HTTPS, update:
+This project demonstrates:
 
-```env
-CORS_ORIGIN=https://ucms.mindgnite.com
-```
+* Full-stack development
+* Containerized deployment
+* Reverse proxy architecture
+* Practical DevOps workflow
 
-Then rebuild the backend so the new origin is loaded:
+---
 
-```bash
-docker compose up --build -d backend frontend
-```
+## ⭐ If you find this useful
 
-For Let's Encrypt, keep host Nginx on ports `80` and `443`, terminate HTTPS there, and proxy to this app's frontend container at `http://127.0.0.1:4173`.
+Give it a star ⭐ on GitHub and share!
+
+---
