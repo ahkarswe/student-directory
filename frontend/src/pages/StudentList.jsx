@@ -75,9 +75,10 @@ function StudentList({ isAdmin }) {
           <p className="eyebrow">Career-ready student records</p>
           <h2>Find students by name, roll number, role, or company.</h2>
         </div>
-        <Link to="/students/new" className="button button-primary">
+        {/* <Link to="/students/new" className="button button-primary"> */}
+         {isAdmin && (<Link to="/students/new" className="button button-primary">
           Add student
-        </Link>
+        </Link>)}
       </div>
 
       <SearchFilters filters={filters} onChange={setFilters} onSubmit={handleSubmit} onReset={handleReset} />
@@ -92,11 +93,18 @@ function StudentList({ isAdmin }) {
         </div>
       )}
 
-      <div className="student-grid">
+      {/* <div className="student-grid">
         {students.map((student) => (
           <StudentCard key={student._id} student={student} canDelete={isAdmin} onDelete={handleDelete} />
         ))}
+      </div> */}
+
+       <div className="student-grid">
+        {students.map((student) => (
+          <StudentCard key={student._id} student={student} canDelete={isAdmin} isAdmin={isAdmin} onDelete={handleDelete} />
+        ))}
       </div>
+
 
       <Pagination pagination={pagination} onPageChange={handlePageChange} />
     </section>

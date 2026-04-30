@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import StatusBadge from "./StatusBadge.jsx";
 
-function StudentCard({ student, canDelete, onDelete }) {
+// function StudentCard({ student, canDelete, onDelete }) {
+function StudentCard({ student, canDelete, onDelete, isAdmin }) {
   const work = student.work || {};
   const socialLinks = student.socialLinks || {};
 
@@ -46,9 +47,10 @@ function StudentCard({ student, canDelete, onDelete }) {
           <Link to={`/students/${student._id}`} className="button button-secondary">
             View
           </Link>
-          <Link to={`/students/${student._id}/edit`} className="button button-secondary">
+          {/* <Link to={`/students/${student._id}/edit`} className="button button-secondary"> */}
+           {isAdmin && (<Link to={`/students/${student._id}/edit`} className="button button-secondary">
             Edit
-          </Link>
+          </Link>)}
           {canDelete && (
             <button type="button" className="button button-danger" onClick={() => onDelete(student)}>
               Delete

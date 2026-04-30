@@ -91,9 +91,10 @@ function StudentDetail({ isAdmin }) {
           </div>
 
           <div className="profile-actions">
-            <Link to={`/students/${student._id}/edit`} className="button button-primary">
+            {/* <Link to={`/students/${student._id}/edit`} className="button button-primary"> */}
+            {isAdmin && (<Link to={`/students/${student._id}/edit`} className="button button-primary">
               Edit profile
-            </Link>
+            </Link>)}
             {isAdmin && (
               <button type="button" className="button button-danger" onClick={handleDelete}>
                 Delete profile

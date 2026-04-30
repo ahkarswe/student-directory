@@ -28,7 +28,8 @@ function App() {
               <NavLink to="/" end>
                 Profiles
               </NavLink>
-              <NavLink to="/students/new">Add student</NavLink>
+              {/* <NavLink to="/students/new">Add student</NavLink> */}
+              {isAdmin && <NavLink to="/students/new">Add student</NavLink>}
               {isAdmin && <NavLink to="/admin/users">Users</NavLink>}
             </>
           )}
@@ -45,12 +46,14 @@ function App() {
       <main>
         <Routes>
           <Route path="/login" element={auth ? <Navigate to="/" replace /> : <Login onLogin={setAuth} />} />
-          <Route path="/" element={<StudentList isAdmin={isAdmin} />} />
-          <Route path="/students/:id" element={<StudentDetail isAdmin={isAdmin} />} />
-          {/* <Route path="/" element={<ProtectedRoute auth={auth}><StudentList isAdmin={isAdmin} /></ProtectedRoute>} /> */}
-          <Route path="/students/new" element={<ProtectedRoute auth={auth}><StudentForm /></ProtectedRoute>} />
-          {/* <Route path="/students/:id" element={<ProtectedRoute auth={auth}><StudentDetail isAdmin={isAdmin} /></ProtectedRoute>} /> */}
-          <Route path="/students/:id/edit" element={<ProtectedRoute auth={auth}><StudentForm mode="edit" /></ProtectedRoute>} />
+          {/* <Route path="/" element={<StudentList isAdmin={isAdmin} />} />
+          <Route path="/students/:id" element={<StudentDetail isAdmin={isAdmin} />} /> */}
+          <Route path="/" element={<ProtectedRoute auth={auth}><StudentList isAdmin={isAdmin} /></ProtectedRoute>} />
+          {/* <Route path="/students/new" element={<ProtectedRoute auth={auth}><StudentForm /></ProtectedRoute>} /> */}
+          <Route path="/students/new" element={<ProtectedRoute auth={auth} adminOnly><StudentForm /></ProtectedRoute>} />
+          <Route path="/students/:id" element={<ProtectedRoute auth={auth}><StudentDetail isAdmin={isAdmin} /></ProtectedRoute>} />
+          {/* <Route path="/students/:id/edit" element={<ProtectedRoute auth={auth}><StudentForm mode="edit" /></ProtectedRoute>} /> */}
+          <Route path="/students/:id/edit" element={<ProtectedRoute auth={auth} adminOnly><StudentForm mode="edit"/></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute auth={auth} adminOnly><UserManagement /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to={auth ? "/" : "/login"} replace />} />
         </Routes>
