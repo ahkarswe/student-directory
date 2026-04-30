@@ -1,5 +1,6 @@
 server {
-    server_name ucms.mindgnite.com;
+     listen 80;
+    server_name your-domain.com; //put your public domain name
 
     client_max_body_size 6m;
 
@@ -35,24 +36,5 @@ location /mongo/ {
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
 }
-
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/ucms.mindgnite.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/ucms.mindgnite.com/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
-}
-
-server {
-    if ($host = ucms.mindgnite.com) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-
-    listen 80;
-    server_name ucms.mindgnite.com;
-    return 404; # managed by Certbot
-
 
 }
