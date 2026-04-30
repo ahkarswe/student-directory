@@ -181,6 +181,23 @@ http://localhost:5000
 
 Your host Nginx should receive public traffic for `ucms.mindgnite.com` and proxy to these local container ports.
 
+## Run Locally On This Machine
+
+To run the same Docker stack on `localhost`, use the local Nginx container that ships in `docker-compose.yml`:
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+```
+
+Then open:
+
+```text
+http://localhost:8080
+```
+
+That local proxy forwards `/api` and `/uploads` to the backend container and the app shell to the frontend container.
+
 ## Environment Variables
 
 Example values are included in `.env.example` and `backend/.env.example`:
@@ -188,7 +205,7 @@ Example values are included in `.env.example` and `backend/.env.example`:
 ```env
 MONGO_URI=mongodb://mongo:27017/studentdb
 PORT=5000
-CORS_ORIGIN=http://ucms.mindgnite.com
+CORS_ORIGIN=http://localhost:8080
 UPLOAD_DIR=/uploads
 FRONTEND_PORT=4173
 ADMIN_USERNAME=admin
@@ -198,17 +215,19 @@ JWT_SECRET=change-this-to-a-long-random-secret
 
 Change `ADMIN_PASSWORD` and `JWT_SECRET` before using the app in production.
 
-For local-only Docker testing on the same machine, you can set `FRONTEND_PORT=3000` and `CORS_ORIGIN=http://localhost:3000` in `.env`.
+For local-only Docker testing on the same machine, you can still set `FRONTEND_PORT=3000` and `CORS_ORIGIN=http://localhost:3000` in `.env` if you want to run the frontend directly through Vite instead of the local proxy.
 
 ## Upload Persistence
 
-The backend stores uploaded files in `/uploads`. Docker Compose maps that directory to the named volume `uploads-data`, so images remain available after containers restart.
+The backend stores uploaded files in `/uploads`. In local Docker mode, the uploads directory is mounted from `./data/uploads` so it stays inside this workspace and works on any machine.
 
 MongoDB stores data in the named volume `mongo-data`, so student records also persist across restarts.
 
 ## Notes For Development
 
 The frontend calls `/api/students`. In production, your host Nginx should proxy `/api` to the backend container and `/uploads` to backend static file serving.
+
+For local Docker runs, the bundled [`nginx/local.conf`](./nginx/local.conf) provides the same proxy behavior on `http://localhost:8080`.
 
 For local non-Docker development, run MongoDB locally or update `MONGO_URI`, then start backend and frontend separately with:
 

@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+data/
+backup/
+uploads/
+mongo-data/
+
+dist/
+build/
+
+.DS_Store
+*.log
