@@ -206,10 +206,16 @@ MongoDB (Database)
 | Proxy      | Nginx             |
 
 ---
-
 ## 📸 Screenshots
+### Login Page
+![Login](docs/screenshots/login.png)
 
-> Add your screenshots here
+### Student List
+![Admin Page](docs/screenshots/admin.png)
+
+### Student Form
+![Student Form](docs/screenshots/form.png)
+
 
 ```text
 /docs/screenshots/
