@@ -19,8 +19,8 @@ function App() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <NavLink to="/" className="brand" aria-label="UCMS MBA 3rd Batch's Student Directory home">
-          UCMS MBA 3rd Batch's Student Directory
+        <NavLink to="/" className="brand" aria-label="Student Directory home">
+          Student Directory
         </NavLink>
         <nav className="main-nav" aria-label="Primary navigation">
           {auth && (
