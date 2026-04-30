@@ -1,4 +1,4 @@
-# UCMS MBA 3rd Batch's Student Directory
+# Student Directory
 
 A production-ready student directory built with React, Node.js, Express, MongoDB, Docker Compose, and persistent local upload storage.
 
@@ -314,9 +314,11 @@ mongorestore --uri="mongodb://localhost:27017" --drop ./backup/studentdb
 ## 🌐 Production Deployment
 
 1. Point domain to server IP
-2. Configure host Nginx
+2. remove nginx service in docker compose if needed.
+2. Configure host Nginx with realdomain.com
 3. Run Docker stack
 4. Enable HTTPS (Let's Encrypt)
+
 
 ---
 
