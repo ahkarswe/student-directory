@@ -73,6 +73,23 @@ export const createUser = (user) =>
     body: JSON.stringify(user)
   });
 
+  export const deleteUser = async (id) => {
+  const response = await fetch(`/api/auth/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getStoredAuth()?.token}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to delete user");
+  }
+
+  return response.json();
+};
+
 export const getStudents = (params) => {
   const query = buildQueryString(params);
   return request(`/students${query ? `?${query}` : ""}`);

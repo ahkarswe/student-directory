@@ -3,7 +3,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { deleteStudent, getStudent } from "../services/api.js";
 
-function StudentDetail({ isAdmin }) {
+function StudentDetail({ auth }) {
+  const role = auth?.role;
+
+  const isAdmin = role === "admin";
+  const canEdit = role === "admin" || role === "editor";
   const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
@@ -85,14 +89,14 @@ function StudentDetail({ isAdmin }) {
           </div>
 
           <div className="link-list">
-            {socialLinks.facebook && <a href={socialLinks.facebook}>Facebook</a>}
-            {socialLinks.linkedin && <a href={socialLinks.linkedin}>LinkedIn</a>}
-            {socialLinks.github && <a href={socialLinks.github}>GitHub</a>}
+            {socialLinks.facebook && <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" >Facebook</a>}
+            {socialLinks.linkedin && <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" >LinkedIn</a>}
+            {socialLinks.github && <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" >GitHub</a>}
           </div>
 
           <div className="profile-actions">
             {/* <Link to={`/students/${student._id}/edit`} className="button button-primary"> */}
-            {isAdmin && (<Link to={`/students/${student._id}/edit`} className="button button-primary">
+            {canEdit && (<Link to={`/students/${student._id}/edit`} className="button button-primary">
               Edit profile
             </Link>)}
             {isAdmin && (

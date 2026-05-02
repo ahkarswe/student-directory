@@ -9,7 +9,12 @@ import StudentList from "./pages/StudentList.jsx";
 
 function App() {
   const [auth, setAuth] = useState(getStoredAuth);
-  const isAdmin = auth?.role === "admin";
+  const role = auth?.role;
+
+  const isAdmin = role === "admin";
+  const isEditor = role === "editor";
+
+  const canEdit = role === "admin" || role === "editor";
 
   const handleLogout = () => {
     clearStoredAuth();
@@ -29,7 +34,7 @@ function App() {
                 Profiles
               </NavLink>
               {/* <NavLink to="/students/new">Add student</NavLink> */}
-              {isAdmin && <NavLink to="/students/new">Add student</NavLink>}
+              {canEdit && <NavLink to="/students/new">Add student</NavLink>}
               {isAdmin && <NavLink to="/admin/users">Users</NavLink>}
             </>
           )}
@@ -48,13 +53,18 @@ function App() {
           <Route path="/login" element={auth ? <Navigate to="/" replace /> : <Login onLogin={setAuth} />} />
           {/* <Route path="/" element={<StudentList isAdmin={isAdmin} />} />
           <Route path="/students/:id" element={<StudentDetail isAdmin={isAdmin} />} /> */}
-          <Route path="/" element={<ProtectedRoute auth={auth}><StudentList isAdmin={isAdmin} /></ProtectedRoute>} />
+          {/* for all auth users */}
+          <Route path="/" element={<ProtectedRoute auth={auth}><StudentList auth={auth} /></ProtectedRoute>} />
+          <Route path="/students/:id" element={<ProtectedRoute auth={auth}><StudentDetail auth={auth} /></ProtectedRoute>} />
           {/* <Route path="/students/new" element={<ProtectedRoute auth={auth}><StudentForm /></ProtectedRoute>} /> */}
-          <Route path="/students/new" element={<ProtectedRoute auth={auth} adminOnly><StudentForm /></ProtectedRoute>} />
-          <Route path="/students/:id" element={<ProtectedRoute auth={auth}><StudentDetail isAdmin={isAdmin} /></ProtectedRoute>} />
+          {/* for editor and admin */}
+          <Route path="/students/new" element={<ProtectedRoute auth={auth} allowedRoles={["editor", "admin"]}><StudentForm /></ProtectedRoute>} />
+
           {/* <Route path="/students/:id/edit" element={<ProtectedRoute auth={auth}><StudentForm mode="edit" /></ProtectedRoute>} /> */}
-          <Route path="/students/:id/edit" element={<ProtectedRoute auth={auth} adminOnly><StudentForm mode="edit"/></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute auth={auth} adminOnly><UserManagement /></ProtectedRoute>} />
+          <Route path="/students/:id/edit" element={<ProtectedRoute auth={auth} allowedRoles={["editor", "admin"]}><StudentForm mode="edit" /></ProtectedRoute>} />
+          {/* for admin only */}
+          <Route path="/admin/users" element={<ProtectedRoute auth={auth} allowedRoles={["admin"]}><UserManagement auth={auth} /></ProtectedRoute>} />
+          
           <Route path="*" element={<Navigate to={auth ? "/" : "/login"} replace />} />
         </Routes>
       </main>
@@ -62,12 +72,12 @@ function App() {
   );
 }
 
-function ProtectedRoute({ auth, adminOnly = false, children }) {
+function ProtectedRoute({ auth, allowedRoles = [], children }) {
   if (!auth) {
     return <Navigate to="/login" replace />;
   }
 
-  if (adminOnly && auth.role !== "admin") {
+  if (allowedRoles.length && !allowedRoles.includes(auth.role)) {
     return <Navigate to="/" replace />;
   }
 

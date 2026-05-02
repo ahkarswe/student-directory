@@ -15,12 +15,17 @@ const defaultFilters = {
   limit: 12
 };
 
-function StudentList({ isAdmin }) {
+function StudentList({ auth }) {
   const [students, setStudents] = useState([]);
   const [filters, setFilters] = useState(defaultFilters);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const role = auth?.role;
+
+  const isAdmin = role === "admin";
+  const canEdit = role === "admin" || role === "editor";
+  const canDelete = role === "admin";
 
   const loadStudents = async (nextFilters = filters) => {
     try {
@@ -76,7 +81,7 @@ function StudentList({ isAdmin }) {
           <h2>Find students by name, roll number, role, or company.</h2>
         </div>
         {/* <Link to="/students/new" className="button button-primary"> */}
-         {isAdmin && (<Link to="/students/new" className="button button-primary">
+         {canEdit && (<Link to="/students/new" className="button button-primary">
           Add student
         </Link>)}
       </div>
@@ -101,7 +106,7 @@ function StudentList({ isAdmin }) {
 
        <div className="student-grid">
         {students.map((student) => (
-          <StudentCard key={student._id} student={student} canDelete={isAdmin} isAdmin={isAdmin} onDelete={handleDelete} />
+          <StudentCard key={student._id} student={student} canDelete={canDelete} canEdit={canEdit} onDelete={handleDelete} />
         ))}
       </div>
 

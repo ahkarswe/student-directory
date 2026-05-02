@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import StatusBadge from "./StatusBadge.jsx";
 
 // function StudentCard({ student, canDelete, onDelete }) {
-function StudentCard({ student, canDelete, onDelete, isAdmin }) {
+function StudentCard({ student, canDelete, canEdit, onDelete }) {
   const work = student.work || {};
   const socialLinks = student.socialLinks || {};
 
@@ -38,9 +38,9 @@ function StudentCard({ student, canDelete, onDelete, isAdmin }) {
         </div>
 
         <div className="social-row">
-          {socialLinks.facebook && <a href={socialLinks.facebook}>Facebook</a>}
-          {socialLinks.linkedin && <a href={socialLinks.linkedin}>LinkedIn</a>}
-          {socialLinks.github && <a href={socialLinks.github}>GitHub</a>}
+          {socialLinks.facebook && <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" >Facebook</a>}
+          {socialLinks.linkedin && <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
+          {socialLinks.github && <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" >GitHub</a>}
         </div>
 
         <div className="card-actions">
@@ -48,7 +48,7 @@ function StudentCard({ student, canDelete, onDelete, isAdmin }) {
             View
           </Link>
           {/* <Link to={`/students/${student._id}/edit`} className="button button-secondary"> */}
-           {isAdmin && (<Link to={`/students/${student._id}/edit`} className="button button-secondary">
+           {canEdit && (<Link to={`/students/${student._id}/edit`} className="button button-secondary">
             Edit
           </Link>)}
           {canDelete && (
