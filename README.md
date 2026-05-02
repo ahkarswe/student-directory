@@ -298,6 +298,7 @@ mongodump --uri="mongodb://localhost:27017/studentdb" --out=./backup
 
 ```bash
 mongorestore --uri="mongodb://localhost:27017" --drop ./backup/studentdb
+docker exec -it student-directory-mongo-1 mongorestore --db studentdb --drop /backup/studentdb
 ```
 
 ---
