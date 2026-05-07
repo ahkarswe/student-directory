@@ -13,7 +13,7 @@ function SearchFilters({ filters, onChange, onSubmit, onReset }) {
           name="search"
           value={filters.search}
           onChange={updateFilter}
-          placeholder="Name, roll number, company, job title"
+          placeholder="Name, roll number, thesis title, supervisor"
         />
       </label>
 

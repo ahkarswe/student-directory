@@ -43,6 +43,8 @@ const studentSchema = new mongoose.Schema(
       default: "",
       match: [/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email address is invalid"]
     },
+    thesisTitle: { type: String, trim: true, default: "" },
+    supervisorName: { type: String, trim: true, default: "" },
     work: { type: workSchema, default: () => ({}) },
     socialLinks: { type: socialLinksSchema, default: () => ({}) },
     photo: { type: String, default: "" }
@@ -53,6 +55,8 @@ const studentSchema = new mongoose.Schema(
 studentSchema.index({
   name: "text",
   rollNumber: "text",
+  thesisTitle: "text",
+  supervisorName: "text",
   "work.company": "text",
   "work.jobTitle": "text"
 });

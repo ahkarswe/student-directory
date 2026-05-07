@@ -10,6 +10,8 @@ const parseStudentPayload = (body) => ({
   rollNumber: body.rollNumber,
   phone: body.phone,
   email: body.email,
+  thesisTitle: body.thesisTitle,
+  supervisorName: body.supervisorName,
   work: {
     jobTitle: body.jobTitle,
     company: body.company,
@@ -44,6 +46,8 @@ const buildQuery = (query) => {
     filters.$or = [
       { name: searchRegex },
       { rollNumber: searchRegex },
+      { thesisTitle: searchRegex },
+      { supervisorName: searchRegex },
       { "work.company": searchRegex },
       { "work.jobTitle": searchRegex }
     ];

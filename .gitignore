@@ -5,7 +5,9 @@ data/
 backup/
 uploads/
 mongo-data/
-
+test/
+mongo-dump.sh
+mongo-restore.sh
 dist/
 build/
 

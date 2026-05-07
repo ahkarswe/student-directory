@@ -110,6 +110,24 @@ function StudentForm({ mode = "create" }) {
                 placeholder="student@example.com"
               />
             </label>
+            <label>
+              Thesis title
+              <input
+                name="thesisTitle"
+                value={values.thesisTitle}
+                onChange={updateValue}
+                placeholder="Research topic or dissertation title"
+              />
+            </label>
+            <label>
+              Supervisor name
+              <input
+                name="supervisorName"
+                value={values.supervisorName}
+                onChange={updateValue}
+                placeholder="Advisor or supervisor"
+              />
+            </label>
           </div>
         </fieldset>
 

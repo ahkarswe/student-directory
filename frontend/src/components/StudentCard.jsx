@@ -31,6 +31,12 @@ function StudentCard({ student, canDelete, canEdit, onDelete }) {
           {work.jobTitle || "Career details pending"}
           {work.company ? ` at ${work.company}` : ""}
         </p>
+        {(student.thesisTitle || student.supervisorName) && (
+          <p className="muted">
+            {student.thesisTitle || "Thesis title not provided"}
+            {student.supervisorName ? ` · Supervisor: ${student.supervisorName}` : ""}
+          </p>
+        )}
         <p className="muted">{work.location || "Location not provided"}</p>
         <div className="contact-line">
           <span>{student.phone}</span>

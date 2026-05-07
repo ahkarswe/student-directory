@@ -77,10 +77,18 @@ function StudentDetail({ auth }) {
             {work.jobTitle || "Career details pending"}
             {work.company ? ` at ${work.company}` : ""}
           </p>
+          {(student.thesisTitle || student.supervisorName) && (
+            <p className="profile-summary">
+              {student.thesisTitle || "Thesis title not provided"}
+              {student.supervisorName ? ` · Supervisor: ${student.supervisorName}` : ""}
+            </p>
+          )}
 
           <div className="detail-grid">
             <DetailItem label="Phone" value={student.phone} />
             <DetailItem label="Email" value={student.email} />
+            <DetailItem label="Thesis title" value={student.thesisTitle} />
+            <DetailItem label="Supervisor" value={student.supervisorName} />
             <DetailItem label="Company" value={work.company} />
             <DetailItem label="Department" value={work.department} />
             <DetailItem label="Location" value={work.location} />
