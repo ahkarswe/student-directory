@@ -28,6 +28,14 @@ const socialLinksSchema = new mongoose.Schema(
 const studentSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    studentId: {
+      type: String,
+      required: true,
+      unique: true,
+      sparse: true,
+      trim: true,
+      uppercase: true
+    },
     rollNumber: {
       type: String,
       required: true,
@@ -35,13 +43,26 @@ const studentSchema = new mongoose.Schema(
       trim: true,
       uppercase: true
     },
-    phone: { type: String, required: [true, "Phone number is required"], trim: true },
+    phone: { type: String, trim: true, default: "" },
     email: {
       type: String,
       trim: true,
       lowercase: true,
-      default: "",
+      unique: true,
+      sparse: true,
       match: [/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email address is invalid"]
+    },
+    department: { type: String, trim: true, default: "" },
+    batch: { type: String, trim: true, default: "" },
+    profileStatus: {
+      type: String,
+      enum: ["pending", "approved", "suspended"],
+      default: "approved"
+    },
+    ownerUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
     },
     work: { type: workSchema, default: () => ({}) },
     socialLinks: { type: socialLinksSchema, default: () => ({}) },
@@ -52,9 +73,21 @@ const studentSchema = new mongoose.Schema(
 
 studentSchema.index({
   name: "text",
+  studentId: "text",
   rollNumber: "text",
+  department: "text",
   "work.company": "text",
   "work.jobTitle": "text"
+});
+
+studentSchema.set("toJSON", {
+  transform: (_doc, ret) => {
+    ret.id = ret._id;
+    ret.ownerId = ret.ownerUser?.toString() || null;
+    delete ret.__v;
+    delete ret.ownerUser;
+    return ret;
+  }
 });
 
 export default mongoose.model("Student", studentSchema);

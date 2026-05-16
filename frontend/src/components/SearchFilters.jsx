@@ -13,7 +13,7 @@ function SearchFilters({ filters, onChange, onSubmit, onReset }) {
           name="search"
           value={filters.search}
           onChange={updateFilter}
-          placeholder="Name, roll number, company, job title"
+          placeholder="Name, student ID, department, batch, company"
         />
       </label>
 
@@ -38,6 +38,7 @@ function SearchFilters({ filters, onChange, onSubmit, onReset }) {
         <select name="sortBy" value={filters.sortBy} onChange={updateFilter}>
           <option value="createdAt">Newest</option>
           <option value="name">Name</option>
+          <option value="studentId">Student ID</option>
           <option value="work.company">Company</option>
           <option value="work.experienceYears">Experience</option>
         </select>

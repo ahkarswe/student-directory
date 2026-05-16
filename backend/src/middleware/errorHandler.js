@@ -21,7 +21,17 @@ export const errorHandler = (err, _req, res, _next) => {
 
   if (err.code === 11000) {
     statusCode = 409;
-    message = err.keyPattern?.username ? "Username already exists" : "Roll number already exists";
+    if (err.keyPattern?.code) {
+      message = "Invite code already exists";
+    } else if (err.keyPattern?.studentId) {
+      message = "Student ID already exists";
+    } else if (err.keyPattern?.email) {
+      message = "Email already exists";
+    } else if (err.keyPattern?.username) {
+      message = "Username already exists";
+    } else {
+      message = "Duplicate value already exists";
+    }
   }
 
   if (err.code === "LIMIT_FILE_SIZE") {

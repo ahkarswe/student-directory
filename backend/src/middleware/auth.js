@@ -1,53 +1,28 @@
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
-import User from "../models/User.js";
+import { getCurrentUser } from "../services/authService.js";
+import { hasRole, isProfileOwner } from "../services/authorizationUtils.js";
 
 export const requireAuth = async (req, res, next) => {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
 
-  // ✅ now safe to log
-  console.log("TOKEN:", token);
-
   if (!token) {
     res.status(401);
-    return next(new Error("Login is required"));
+    next(new Error("Login is required"));
+    return;
   }
 
   try {
-    const payload = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "change-this-to-a-long-random-secret"
-    );
+    const payload = jwt.verify(token, process.env.JWT_SECRET || "change-this-to-a-long-random-secret");
+    const currentUser = await getCurrentUser(payload.sub);
 
-    console.log("PAYLOAD:", payload);
-    console.log("SUB:", payload.sub);
-
-    // ✅ handle env-admin
-    if (payload.sub === "env-admin") {
-      req.user = {
-        id: "env-admin",
-        username: "admin",
-        role: "admin"
-      };
-      return next();
-    }
-
-    // ✅ prevent Mongo crash
-    if (!mongoose.Types.ObjectId.isValid(payload.sub)) {
+    if (!currentUser) {
       res.status(401);
-      return next(new Error("Invalid session"));
+      next(new Error("Session is invalid"));
+      return;
     }
 
-    const user = await User.findById(payload.sub).select("-passwordHash");
-
-    if (!user) {
-      console.log("User not found for ID:", payload.sub);
-      res.status(401);
-      return next(new Error("Session is invalid"));
-    }
-
-    req.user = user;
+    req.user = currentUser;
     next();
   } catch (error) {
     res.status(401);
@@ -55,19 +30,45 @@ export const requireAuth = async (req, res, next) => {
   }
 };
 
-export const requireAdmin = (req, res, next) => {
-  requireAuth(req, res, (error) => {
-    if (error) {
-      next(error);
-      return;
-    }
+export const requireRole = (...roles) => (req, res, next) => {
+  if (!req.user) {
+    res.status(401);
+    next(new Error("Unauthorized"));
+    return;
+  }
 
-    if (req.user.role !== "admin") {
-      res.status(403);
-      next(new Error("Admin role is required"));
-      return;
-    }
+  if (!hasRole(req.user, roles)) {
+    res.status(403);
+    next(new Error("Forbidden"));
+    return;
+  }
 
+  next();
+};
+
+export const requireOwnershipOrAdmin = (req, res, next) => {
+  if (!req.user) {
+    res.status(401);
+    next(new Error("Unauthorized"));
+    return;
+  }
+
+  if (hasRole(req.user, "admin")) {
     next();
-  });
+    return;
+  }
+
+  if (!req.resource) {
+    res.status(500);
+    next(new Error("Resource not loaded"));
+    return;
+  }
+
+  if (!isProfileOwner(req.user, req.resource)) {
+    res.status(403);
+    next(new Error("You can only edit your own profile"));
+    return;
+  }
+
+  next();
 };

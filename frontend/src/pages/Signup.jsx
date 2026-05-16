@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { login } from "../services/api.js";
+import { signup } from "../services/api.js";
 
-function Login({ onLogin }) {
-  const [values, setValues] = useState({ identifier: "", password: "" });
+function Signup({ onSignup }) {
+  const [values, setValues] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    studentId: "",
+    inviteCode: ""
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -17,8 +23,8 @@ function Login({ onLogin }) {
     setError("");
 
     try {
-      const user = await login(values);
-      onLogin(user);
+      const auth = await signup(values);
+      onSignup(auth);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -30,8 +36,8 @@ function Login({ onLogin }) {
     <section className="page-section narrow-section">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Private directory</p>
-          <h1>Login to access student records.</h1>
+          <p className="eyebrow">Invite-based signup</p>
+          <h1>Create your student account.</h1>
         </div>
       </div>
 
@@ -39,17 +45,15 @@ function Login({ onLogin }) {
 
       <form className="student-form" onSubmit={handleSubmit}>
         <fieldset>
-          <legend>Login</legend>
+          <legend>Account details</legend>
           <div className="form-grid">
             <label>
-              Email or username
-              <input
-                name="identifier"
-                value={values.identifier}
-                onChange={updateValue}
-                autoComplete="username"
-                required
-              />
+              Full name
+              <input name="fullName" value={values.fullName} onChange={updateValue} autoComplete="name" required />
+            </label>
+            <label>
+              Email
+              <input name="email" value={values.email} onChange={updateValue} type="email" autoComplete="email" required />
             </label>
             <label>
               Password
@@ -58,19 +62,28 @@ function Login({ onLogin }) {
                 value={values.password}
                 onChange={updateValue}
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
+                minLength="8"
                 required
               />
+            </label>
+            <label>
+              Student ID
+              <input name="studentId" value={values.studentId} onChange={updateValue} required />
+            </label>
+            <label>
+              Invite code
+              <input name="inviteCode" value={values.inviteCode} onChange={updateValue} required />
             </label>
           </div>
         </fieldset>
 
         <div className="form-actions">
           <button type="submit" className="button button-primary" disabled={saving}>
-            {saving ? "Logging in..." : "Login"}
+            {saving ? "Creating account..." : "Create account"}
           </button>
-          <Link to="/signup" className="button button-secondary">
-            Create account
+          <Link to="/login" className="button button-secondary">
+            Back to login
           </Link>
         </div>
       </form>
@@ -78,4 +91,4 @@ function Login({ onLogin }) {
   );
 }
 
-export default Login;
+export default Signup;

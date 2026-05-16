@@ -10,6 +10,18 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true
     },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      unique: true,
+      sparse: true
+    },
+    fullName: {
+      type: String,
+      trim: true,
+      default: ""
+    },
     passwordHash: {
       type: String,
       required: true
@@ -22,6 +34,15 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.set("toJSON", {
+  transform: (_doc, ret) => {
+    ret.id = ret._id;
+    delete ret.__v;
+    delete ret.passwordHash;
+    return ret;
+  }
+});
 
 userSchema.methods.matchPassword = function matchPassword(password) {
   return bcrypt.compare(password, this.passwordHash);

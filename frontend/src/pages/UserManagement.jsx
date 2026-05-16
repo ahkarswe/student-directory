@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { createUser, getUsers, deleteUser } from "../services/api.js";
+import { createUser, deleteUser, getUsers } from "../services/api.js";
 
 function UserManagement({ auth }) {
   const [users, setUsers] = useState([]);
   const [values, setValues] = useState({
     username: "",
+    fullName: "",
+    email: "",
     password: "",
     role: "user"
   });
@@ -44,7 +46,7 @@ function UserManagement({ auth }) {
 
     try {
       await createUser(values);
-      setValues({ username: "", password: "", role: "user" });
+      setValues({ username: "", fullName: "", email: "", password: "", role: "user" });
       setMessage("User created.");
       loadUsers();
     } catch (err) {
@@ -79,7 +81,6 @@ function UserManagement({ auth }) {
       {error && <p className="state-message error-message">{error}</p>}
       {message && <p className="state-message success-message">{message}</p>}
 
-      {/* 🔹 Create User Form */}
       <form className="student-form" onSubmit={handleSubmit}>
         <fieldset>
           <legend>New user</legend>
@@ -87,12 +88,17 @@ function UserManagement({ auth }) {
           <div className="form-grid">
             <label>
               Username
-              <input
-                name="username"
-                value={values.username}
-                onChange={updateValue}
-                required
-              />
+              <input name="username" value={values.username} onChange={updateValue} required />
+            </label>
+
+            <label>
+              Full name
+              <input name="fullName" value={values.fullName} onChange={updateValue} />
+            </label>
+
+            <label>
+              Email
+              <input name="email" value={values.email} onChange={updateValue} type="email" />
             </label>
 
             <label>
@@ -109,11 +115,7 @@ function UserManagement({ auth }) {
 
             <label>
               Role
-              <select
-                name="role"
-                value={values.role}
-                onChange={updateValue}
-              >
+              <select name="role" value={values.role} onChange={updateValue}>
                 <option value="user">User</option>
                 <option value="editor">Editor</option>
                 <option value="admin">Admin</option>
@@ -123,17 +125,12 @@ function UserManagement({ auth }) {
         </fieldset>
 
         <div className="form-actions">
-          <button
-            type="submit"
-            className="button button-primary"
-            disabled={saving}
-          >
+          <button type="submit" className="button button-primary" disabled={saving}>
             {saving ? "Creating..." : "Create user"}
           </button>
         </div>
       </form>
 
-      {/* 🔹 User List */}
       {loading ? (
         <p className="state-message">Loading users...</p>
       ) : (
@@ -144,26 +141,18 @@ function UserManagement({ auth }) {
 
             return (
               <div className="user-row" key={userId}>
-                <strong>{user.username}</strong>
+                <strong>{user.fullName || user.username}</strong>
+
+                <span>{user.email || "No email"}</span>
 
                 <span>
-                  {user.role === "admin"
-                    ? "👑 Admin"
-                    : user.role === "editor"
-                    ? "✏️ Editor"
-                    : "👤 User"}
+                  {user.role === "admin" ? "👑 Admin" : user.role === "editor" ? "✏️ Editor" : "👤 User"}
                 </span>
 
-                <span>
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </span>
+                <span>{new Date(user.createdAt).toLocaleDateString()}</span>
 
-                {/* 🔥 Delete button (not for current user) */}
                 {!isCurrentUser ? (
-                  <button
-                    className="button button-danger"
-                    onClick={() => handleDelete(user)}
-                  >
+                  <button className="button button-danger" onClick={() => handleDelete(user)}>
                     Delete
                   </button>
                 ) : (

@@ -14,3 +14,6 @@ build/
 
 *.gz
 *.old
+mongo-dump.sh
+mongo-restore.sh
+test/

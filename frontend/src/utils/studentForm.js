@@ -16,7 +16,7 @@ export const emptyStudent = {
 
 export const flattenStudent = (student) => ({
   name: student?.name || "",
-  rollNumber: student?.rollNumber || "",
+  rollNumber: student?.studentId || student?.rollNumber || "",
   phone: student?.phone || "",
   email: student?.email || "",
   jobTitle: student?.work?.jobTitle || "",

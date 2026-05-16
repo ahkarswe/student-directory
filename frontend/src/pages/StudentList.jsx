@@ -24,8 +24,8 @@ function StudentList({ auth }) {
   const role = auth?.role;
 
   const isAdmin = role === "admin";
-  const canEdit = role === "admin" || role === "editor";
-  const canDelete = role === "admin";
+  const canDelete = isAdmin;
+  const canCreateStudent = isAdmin;
 
   const loadStudents = async (nextFilters = filters) => {
     try {
@@ -78,12 +78,13 @@ function StudentList({ auth }) {
       <div className="page-heading">
         <div>
           <p className="eyebrow">Career-ready student records</p>
-          <h2>Find students by name, roll number, role, or company.</h2>
+          <h2>Find students by ID, department, batch, or company.</h2>
         </div>
-        {/* <Link to="/students/new" className="button button-primary"> */}
-         {canEdit && (<Link to="/students/new" className="button button-primary">
-          Add student
-        </Link>)}
+        {canCreateStudent && (
+          <Link to="/students/new" className="button button-primary">
+            Add student
+          </Link>
+        )}
       </div>
 
       <SearchFilters filters={filters} onChange={setFilters} onSubmit={handleSubmit} onReset={handleReset} />
@@ -98,18 +99,11 @@ function StudentList({ auth }) {
         </div>
       )}
 
-      {/* <div className="student-grid">
+      <div className="student-grid">
         {students.map((student) => (
-          <StudentCard key={student._id} student={student} canDelete={isAdmin} onDelete={handleDelete} />
-        ))}
-      </div> */}
-
-       <div className="student-grid">
-        {students.map((student) => (
-          <StudentCard key={student._id} student={student} canDelete={canDelete} canEdit={canEdit} onDelete={handleDelete} />
+          <StudentCard key={student._id} student={student} auth={auth} canDelete={canDelete} onDelete={handleDelete} />
         ))}
       </div>
-
 
       <Pagination pagination={pagination} onPageChange={handlePageChange} />
     </section>

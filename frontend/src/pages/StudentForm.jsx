@@ -87,7 +87,7 @@ function StudentForm({ mode = "create" }) {
               <input name="name" value={values.name} onChange={updateValue} required />
             </label>
             <label>
-              Roll number
+              Student ID
               <input name="rollNumber" value={values.rollNumber} onChange={updateValue} placeholder="1/MBA-000" required />
             </label>
             <label>

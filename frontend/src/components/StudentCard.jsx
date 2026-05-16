@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
+import ProfileStatusBadge from "./ProfileStatusBadge.jsx";
 import StatusBadge from "./StatusBadge.jsx";
 
-// function StudentCard({ student, canDelete, onDelete }) {
-function StudentCard({ student, canDelete, canEdit, onDelete }) {
+function StudentCard({ student, auth, canDelete, onDelete }) {
   const work = student.work || {};
   const socialLinks = student.socialLinks || {};
+  const canEdit = auth?.role === "admin" || (auth?.role === "editor" && auth?.id === student.ownerId);
+  const studentId = student.studentId || student.rollNumber;
 
   return (
     <article className={`student-card ${work.status === "Full-time" ? "currently-employed" : ""}`}>
@@ -22,35 +24,40 @@ function StudentCard({ student, canDelete, canEdit, onDelete }) {
         <div className="card-title-row">
           <div>
             <h2>{student.name}</h2>
-            <p className="muted">Roll {student.rollNumber}</p>
+            <p className="muted">{studentId ? `Student ID ${studentId}` : "Student ID not provided"}</p>
           </div>
-          <StatusBadge status={work.status} />
+          <div className="badge-stack">
+            <StatusBadge status={work.status} />
+            <ProfileStatusBadge status={student.profileStatus} />
+          </div>
         </div>
 
         <p className="job-line">
           {work.jobTitle || "Career details pending"}
           {work.company ? ` at ${work.company}` : ""}
         </p>
+        <p className="muted">{student.department ? `${student.department} · Batch ${student.batch || "N/A"}` : "Department not provided"}</p>
         <p className="muted">{work.location || "Location not provided"}</p>
         <div className="contact-line">
-          <span>{student.phone}</span>
+          <span>{student.phone || "Phone not provided"}</span>
           {student.email && <span>{student.email}</span>}
         </div>
 
         <div className="social-row">
-          {socialLinks.facebook && <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" >Facebook</a>}
+          {socialLinks.facebook && <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>}
           {socialLinks.linkedin && <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
-          {socialLinks.github && <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" >GitHub</a>}
+          {socialLinks.github && <a href={socialLinks.github} target="_blank" rel="noopener noreferrer">GitHub</a>}
         </div>
 
         <div className="card-actions">
           <Link to={`/students/${student._id}`} className="button button-secondary">
             View
           </Link>
-          {/* <Link to={`/students/${student._id}/edit`} className="button button-secondary"> */}
-           {canEdit && (<Link to={`/students/${student._id}/edit`} className="button button-secondary">
-            Edit
-          </Link>)}
+          {canEdit && (
+            <Link to={`/students/${student._id}/edit`} className="button button-secondary">
+              Edit
+            </Link>
+          )}
           {canDelete && (
             <button type="button" className="button button-danger" onClick={() => onDelete(student)}>
               Delete

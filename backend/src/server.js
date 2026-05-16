@@ -9,6 +9,7 @@ import { connectDB } from "./config/db.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { uploadDir } from "./middleware/upload.js";
 import authRoutes from "./routes/authRoutes.js";
+import inviteCodeRoutes from "./routes/inviteCodeRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 
 dotenv.config();
@@ -41,6 +42,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/uploads", express.static(path.resolve(uploadDir)));
 app.use("/auth", authRoutes);
+app.use("/invitation-codes", inviteCodeRoutes);
 app.use("/students", studentRoutes);
 
 app.use(notFound);

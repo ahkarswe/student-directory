@@ -1,8 +1,26 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
-const TOKEN_KEY = "ucms_auth_token";
+const AUTH_STATE_KEY = "ucms_auth_state";
+const LEGACY_TOKEN_KEY = "ucms_auth_token";
+
+export const persistAuthState = (auth) => {
+  localStorage.setItem(AUTH_STATE_KEY, JSON.stringify(auth));
+  localStorage.setItem(LEGACY_TOKEN_KEY, auth.token);
+  localStorage.setItem("ucms_auth_username", auth.username || "");
+  localStorage.setItem("ucms_auth_role", auth.role || "");
+};
 
 export const getStoredAuth = () => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const rawAuthState = localStorage.getItem(AUTH_STATE_KEY);
+
+  if (rawAuthState) {
+    try {
+      return JSON.parse(rawAuthState);
+    } catch {
+      localStorage.removeItem(AUTH_STATE_KEY);
+    }
+  }
+
+  const token = localStorage.getItem(LEGACY_TOKEN_KEY);
   const username = localStorage.getItem("ucms_auth_username");
   const role = localStorage.getItem("ucms_auth_role");
 
@@ -10,7 +28,8 @@ export const getStoredAuth = () => {
 };
 
 export const clearStoredAuth = () => {
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(AUTH_STATE_KEY);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
   localStorage.removeItem("ucms_auth_username");
   localStorage.removeItem("ucms_auth_role");
 };
@@ -18,7 +37,7 @@ export const clearStoredAuth = () => {
 const buildQueryString = (params) => {
   const searchParams = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
       searchParams.set(key, value);
     }
@@ -28,7 +47,7 @@ const buildQueryString = (params) => {
 };
 
 const request = async (path, options = {}) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(LEGACY_TOKEN_KEY);
   const headers = new Headers(options.headers || {});
 
   if (token) {
@@ -46,6 +65,15 @@ const request = async (path, options = {}) => {
   return body;
 };
 
+const saveAuthResponse = (response) => {
+  const auth = {
+    token: response.token,
+    ...response.user
+  };
+  persistAuthState(auth);
+  return auth;
+};
+
 export const login = async (credentials) => {
   const response = await request("/auth/login", {
     method: "POST",
@@ -55,12 +83,22 @@ export const login = async (credentials) => {
     body: JSON.stringify(credentials)
   });
 
-  localStorage.setItem(TOKEN_KEY, response.token);
-  localStorage.setItem("ucms_auth_username", response.user.username);
-  localStorage.setItem("ucms_auth_role", response.user.role);
-
-  return response.user;
+  return saveAuthResponse(response);
 };
+
+export const signup = async (payload) => {
+  const response = await request("/auth/signup", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return saveAuthResponse(response);
+};
+
+export const getCurrentUser = () => request("/auth/me");
 
 export const getUsers = () => request("/auth/users");
 
@@ -73,22 +111,26 @@ export const createUser = (user) =>
     body: JSON.stringify(user)
   });
 
-  export const deleteUser = async (id) => {
-  const response = await fetch(`/api/auth/users/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getStoredAuth()?.token}`
-    }
+export const deleteUser = (id) =>
+  request(`/auth/users/${id}`, {
+    method: "DELETE"
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to delete user");
-  }
+export const getInvitationCodes = () => request("/invitation-codes");
 
-  return response.json();
-};
+export const createInvitationCode = (inviteCode) =>
+  request("/invitation-codes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(inviteCode)
+  });
+
+export const deactivateInvitationCode = (id) =>
+  request(`/invitation-codes/${id}/deactivate`, {
+    method: "PATCH"
+  });
 
 export const getStudents = (params) => {
   const query = buildQueryString(params);
@@ -107,6 +149,11 @@ export const updateStudent = (id, formData) =>
   request(`/students/${id}`, {
     method: "PUT",
     body: formData
+  });
+
+export const approveStudentProfile = (id) =>
+  request(`/students/${id}/approve`, {
+    method: "PATCH"
   });
 
 export const deleteStudent = (id) =>
