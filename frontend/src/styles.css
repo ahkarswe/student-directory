@@ -508,6 +508,15 @@ legend {
   border-radius: 8px;
 }
 
+.user-row--editing {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+}
+
+.user-row--editing .card-actions {
+  align-items: center;
+}
+
 .admin-row {
   display: flex;
   justify-content: space-between;

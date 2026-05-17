@@ -6,6 +6,7 @@ import {
   deleteUser,
   listUsers,
   login,
+  updateUser,
   signup
 } from "../controllers/authController.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
@@ -26,9 +27,10 @@ router.get("/me", requireAuth, currentUser);
 
 router
   .route("/users")
-  .get(requireAuth, requireRole("admin"), listUsers)
-  .post(requireAuth, requireRole("admin"), createUser);
+  .get(requireAuth, requireRole("superadmin"), listUsers)
+  .post(requireAuth, requireRole("superadmin"), createUser);
 
-router.delete("/users/:id", requireAuth, requireRole("admin"), deleteUser);
+router.patch("/users/:id", requireAuth, updateUser);
+router.delete("/users/:id", requireAuth, requireRole("superadmin"), deleteUser);
 
 export default router;

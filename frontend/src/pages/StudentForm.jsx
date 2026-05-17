@@ -129,6 +129,10 @@ function StudentForm({ mode = "create" }) {
               <input name="department" value={values.department} onChange={updateValue} />
             </label>
             <label>
+              Batch
+              <input name="batch" value={values.batch} onChange={updateValue} placeholder="2026" />
+            </label>
+            <label>
               Work location
               <input name="location" value={values.location} onChange={updateValue} placeholder="City, Country" />
             </label>

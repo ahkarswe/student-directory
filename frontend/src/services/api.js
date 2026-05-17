@@ -111,6 +111,15 @@ export const createUser = (user) =>
     body: JSON.stringify(user)
   });
 
+export const updateUser = (id, user) =>
+  request(`/auth/users/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(user)
+  });
+
 export const deleteUser = (id) =>
   request(`/auth/users/${id}`, {
     method: "DELETE"

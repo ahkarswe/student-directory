@@ -6,7 +6,8 @@ import { approveStudentProfile, deleteStudent, getStudent } from "../services/ap
 
 function StudentDetail({ auth }) {
   const role = auth?.role;
-  const isAdmin = role === "admin";
+  const canManageProfile = role === "admin" || role === "superadmin";
+  const isSuperadmin = role === "superadmin";
   const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
@@ -61,7 +62,7 @@ function StudentDetail({ auth }) {
 
   const work = student.work || {};
   const socialLinks = student.socialLinks || {};
-  const canEditOwnProfile = isAdmin || (role === "editor" && auth?.id === student.ownerId);
+  const canEditOwnProfile = canManageProfile || (role === "editor" && auth?.id === student.ownerId);
 
   return (
     <section className="page-section">
@@ -105,7 +106,7 @@ function StudentDetail({ auth }) {
             <DetailItem label="Created" value={student.createdAt ? new Date(student.createdAt).toLocaleDateString() : ""} />
           </div>
 
-          {isAdmin && student.profileStatus !== "approved" && (
+          {isSuperadmin && student.profileStatus !== "approved" && (
             <div className="profile-actions">
               <button type="button" className="button button-primary" onClick={handleApprove} disabled={saving}>
                 {saving ? "Approving..." : "Approve profile"}
@@ -125,7 +126,7 @@ function StudentDetail({ auth }) {
                 Edit profile
               </Link>
             )}
-            {isAdmin && (
+            {isSuperadmin && (
               <button type="button" className="button button-danger" onClick={handleDelete}>
                 Delete profile
               </button>

@@ -53,7 +53,7 @@ export const requireOwnershipOrAdmin = (req, res, next) => {
     return;
   }
 
-  if (hasRole(req.user, "admin")) {
+  if (hasRole(req.user, ["admin", "superadmin"])) {
     next();
     return;
   }

@@ -5,7 +5,10 @@ import StatusBadge from "./StatusBadge.jsx";
 function StudentCard({ student, auth, canDelete, onDelete }) {
   const work = student.work || {};
   const socialLinks = student.socialLinks || {};
-  const canEdit = auth?.role === "admin" || (auth?.role === "editor" && auth?.id === student.ownerId);
+  const canEdit =
+    auth?.role === "admin" ||
+    auth?.role === "superadmin" ||
+    (auth?.role === "editor" && auth?.id === student.ownerId);
   const studentId = student.studentId || student.rollNumber;
 
   return (

@@ -6,6 +6,7 @@ import {
   getStoredAuth,
   persistAuthState
 } from "./services/api.js";
+import AccountSettings from "./pages/AccountSettings.jsx";
 import InviteCodeManagement from "./pages/InviteCodeManagement.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -38,8 +39,8 @@ function App() {
   }, []);
 
   const role = auth?.role;
-  const isAdmin = role === "admin";
-  const canCreateStudent = isAdmin;
+  const isSuperadmin = role === "superadmin";
+  const canCreateStudent = role === "admin" || isSuperadmin;
 
   const handleLogout = () => {
     clearStoredAuth();
@@ -59,8 +60,9 @@ function App() {
                 Profiles
               </NavLink>
               {canCreateStudent && <NavLink to="/students/new">Add student</NavLink>}
-              {isAdmin && <NavLink to="/admin/users">Users</NavLink>}
-              {isAdmin && <NavLink to="/admin/invitation-codes">Invites</NavLink>}
+              {auth.id && auth.id !== "env-admin" && <NavLink to="/account">Account</NavLink>}
+              {isSuperadmin && <NavLink to="/admin/users">Users</NavLink>}
+              {isSuperadmin && <NavLink to="/admin/invitation-codes">Invites</NavLink>}
             </>
           ) : (
             <>
@@ -80,7 +82,7 @@ function App() {
       {auth?.profileStatus === "pending" && (
         <section className="page-section pending-banner">
           <p className="eyebrow">Profile pending</p>
-          <h2>Your profile is waiting for admin approval.</h2>
+          <h2>Your profile is waiting for administrator approval.</h2>
           <p>You can still sign in and update your own profile while it is pending.</p>
         </section>
       )}
@@ -93,20 +95,32 @@ function App() {
           <Route path="/students/:id" element={<ProtectedRoute auth={auth}><StudentDetail auth={auth} /></ProtectedRoute>} />
           <Route
             path="/students/new"
-            element={<ProtectedRoute auth={auth} allowedRoles={["admin"]}><StudentForm /></ProtectedRoute>}
+            element={<ProtectedRoute auth={auth} allowedRoles={["admin", "superadmin"]}><StudentForm /></ProtectedRoute>}
           />
           <Route
             path="/students/:id/edit"
             element={<ProtectedRoute auth={auth}><StudentForm mode="edit" auth={auth} /></ProtectedRoute>}
           />
           <Route
+            path="/account"
+            element={
+              <ProtectedRoute auth={auth}>
+                {!auth?.id || auth.id === "env-admin" ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <AccountSettings auth={auth} onAuthUpdate={setAuth} />
+                )}
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/users"
-            element={<ProtectedRoute auth={auth} allowedRoles={["admin"]}><UserManagement auth={auth} /></ProtectedRoute>}
+            element={<ProtectedRoute auth={auth} allowedRoles={["superadmin"]}><UserManagement auth={auth} /></ProtectedRoute>}
           />
           <Route
             path="/admin/invitation-codes"
             element={
-              <ProtectedRoute auth={auth} allowedRoles={["admin"]}>
+              <ProtectedRoute auth={auth} allowedRoles={["superadmin"]}>
                 <InviteCodeManagement auth={auth} />
               </ProtectedRoute>
             }

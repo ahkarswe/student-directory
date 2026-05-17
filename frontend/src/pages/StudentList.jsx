@@ -23,9 +23,8 @@ function StudentList({ auth }) {
   const [error, setError] = useState("");
   const role = auth?.role;
 
-  const isAdmin = role === "admin";
-  const canDelete = isAdmin;
-  const canCreateStudent = isAdmin;
+  const canDelete = role === "superadmin";
+  const canCreateStudent = role === "admin" || role === "superadmin";
 
   const loadStudents = async (nextFilters = filters) => {
     try {

@@ -8,7 +8,7 @@ import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.use(requireAuth, requireRole("admin"));
+router.use(requireAuth, requireRole("superadmin"));
 
 router.route("/").get(listInvitationCodes).post(createInvitationCode);
 router.patch("/:id/deactivate", deactivateInvitationCode);

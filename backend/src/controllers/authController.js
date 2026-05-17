@@ -23,6 +23,8 @@ import {
   validateSignupPayload
 } from "../services/validation.js";
 
+const editableRoles = ["user", "editor", "admin", "superadmin"];
+
 const authResponse = (user, student = null) => ({
   token: issueToken(user),
   user: {
@@ -71,8 +73,8 @@ export const login = async (req, res, next) => {
         id: "env-admin",
         username: adminUsername,
         email: "",
-        fullName: "Administrator",
-        role: "admin"
+        fullName: "Super Administrator",
+        role: "superadmin"
       };
 
       res.json(authResponse(adminUser));
@@ -203,7 +205,7 @@ export const createUser = async (req, res, next) => {
 
     if (normalizedUsername === adminUsername) {
       res.status(409);
-      throw new Error("Username is reserved for the environment admin");
+      throw new Error("Username is reserved for the environment superadmin");
     }
 
     if (password.length < 8) {
@@ -211,9 +213,9 @@ export const createUser = async (req, res, next) => {
       throw new Error("Password must be at least 8 characters");
     }
 
-    if (!["user", "editor", "admin"].includes(normalizedRole)) {
+    if (!editableRoles.includes(normalizedRole)) {
       res.status(400);
-      throw new Error("Role must be user, editor or admin");
+      throw new Error("Role must be user, editor, admin or superadmin");
     }
 
     const existingUser = await User.findOne({
@@ -245,6 +247,76 @@ export const listUsers = async (_req, res, next) => {
   try {
     const users = await User.find().select("username email fullName role createdAt").sort({ createdAt: -1 });
     res.json(users.map((user) => sanitizeUser(user)));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUser = async (req, res, next) => {
+  const { username, email = "", fullName = "", role = "user", password = "" } = req.body;
+
+  const normalizedUsername = normalizeEmail(username);
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedRole = normalizeText(role).toLowerCase();
+  const adminUsername = (process.env.ADMIN_USERNAME || "admin").toLowerCase();
+
+  try {
+    const user = await User.findById(req.params.id);
+    const isSelf = String(req.user?.id || "") === String(req.params.id);
+    const isSuperadmin = req.user?.role === "superadmin";
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    if (!isSuperadmin && !isSelf) {
+      res.status(403);
+      throw new Error("You can only update your own account");
+    }
+
+    if (!normalizedUsername) {
+      res.status(400);
+      throw new Error("Username is required");
+    }
+
+    if (normalizedUsername === adminUsername && user.username !== adminUsername) {
+      res.status(409);
+      throw new Error("Username is reserved for the environment superadmin");
+    }
+
+    if (isSuperadmin && !editableRoles.includes(normalizedRole)) {
+      res.status(400);
+      throw new Error("Role must be user, editor, admin or superadmin");
+    }
+
+    const duplicateUser = await User.findOne({
+      _id: { $ne: user._id },
+      $or: [{ username: normalizedUsername }, ...(normalizedEmail ? [{ email: normalizedEmail }] : [])]
+    });
+
+    if (duplicateUser) {
+      res.status(409);
+      throw new Error("Username or email already exists");
+    }
+
+    user.username = normalizedUsername;
+    user.email = normalizedEmail || undefined;
+    user.fullName = normalizeText(fullName);
+    if (isSuperadmin) {
+      user.role = normalizedRole;
+    }
+
+    if (password) {
+      if (String(password).length < 8) {
+        res.status(400);
+        throw new Error("Password must be at least 8 characters");
+      }
+      user.passwordHash = await User.hashPassword(String(password));
+    }
+
+    const updated = await user.save();
+    res.json(sanitizeUser(updated));
   } catch (error) {
     next(error);
   }

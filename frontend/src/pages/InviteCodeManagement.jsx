@@ -73,7 +73,7 @@ function InviteCodeManagement() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Admin tools</p>
+          <p className="eyebrow">Superadmin tools</p>
           <h1>Manage invite codes.</h1>
         </div>
       </div>
