@@ -14,6 +14,7 @@ import StudentDetail from "./pages/StudentDetail.jsx";
 import StudentForm from "./pages/StudentForm.jsx";
 import StudentList from "./pages/StudentList.jsx";
 import UserManagement from "./pages/UserManagement.jsx";
+import navIcon from "./public/studentdirectory.png";
 
 function App() {
   const [auth, setAuth] = useState(getStoredAuth);
@@ -51,7 +52,8 @@ function App() {
     <div className="app-shell">
       <header className="site-header">
         <NavLink to="/" className="brand" aria-label="Student Directory home">
-          Student Directory
+          <img src={navIcon} alt="" className="brand-icon" />
+          <span>Student Directory</span>
         </NavLink>
         <nav className="main-nav" aria-label="Primary navigation">
           {auth ? (

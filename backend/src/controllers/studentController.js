@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import Student from "../models/Student.js";
+import User from "../models/User.js";
 import { uploadDir } from "../middleware/upload.js";
 
 const allowedSortFields = new Set([
@@ -15,28 +16,33 @@ const allowedSortFields = new Set([
   "work.company"
 ]);
 
-const parseStudentPayload = (body) => ({
-  name: body.name,
-  studentId: body.studentId || body.rollNumber,
-  rollNumber: body.rollNumber || body.studentId,
-  phone: body.phone,
-  email: body.email ? body.email : undefined,
-  department: body.department,
-  batch: body.batch,
-  work: {
-    jobTitle: body.jobTitle,
-    company: body.company,
-    department: body.workDepartment || body.department || body.workDepartment,
-    location: body.location,
-    status: body.status,
-    experienceYears: Number(body.experienceYears || 0)
-  },
-  socialLinks: {
-    facebook: body.facebook,
-    linkedin: body.linkedin,
-    github: body.github
-  }
-});
+const parseStudentPayload = (body) => {
+  const department = body.department || body.depardment || body.workDepartment || "";
+
+  return {
+    name: body.name,
+    studentId: body.studentId || body.rollNumber,
+    rollNumber: body.rollNumber || body.studentId,
+    phone: body.phone,
+    email: body.email ? body.email : undefined,
+    department,
+    depardment: undefined,
+    batch: body.batch,
+    work: {
+      jobTitle: body.jobTitle,
+      company: body.company,
+      department: body.workDepartment || department,
+      location: body.location,
+      status: body.status,
+      experienceYears: Number(body.experienceYears || 0)
+    },
+    socialLinks: {
+      facebook: body.facebook,
+      linkedin: body.linkedin,
+      github: body.github
+    }
+  };
+};
 
 const toSafeRegex = (value) => new RegExp(String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
 
@@ -57,6 +63,7 @@ const buildQuery = (query) => {
       { studentId: searchRegex },
       { rollNumber: searchRegex },
       { department: searchRegex },
+      { depardment: searchRegex },
       { batch: searchRegex },
       { "work.company": searchRegex },
       { "work.jobTitle": searchRegex }
@@ -67,6 +74,7 @@ const buildQuery = (query) => {
   if (query.studentId) filters.studentId = toSafeRegex(query.studentId);
   if (query.rollNumber) filters.rollNumber = toSafeRegex(query.rollNumber);
   if (query.department) filters.department = toSafeRegex(query.department);
+  if (query.depardment) filters.depardment = toSafeRegex(query.depardment);
   if (query.batch) filters.batch = toSafeRegex(query.batch);
   if (query.company) filters["work.company"] = toSafeRegex(query.company);
   if (query.jobTitle) filters["work.jobTitle"] = toSafeRegex(query.jobTitle);
@@ -177,6 +185,48 @@ export const approveStudentProfile = async (req, res, next) => {
   try {
     const student = req.resource;
     student.profileStatus = "approved";
+    const updatedStudent = await student.save();
+    res.json(updatedStudent);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const assignStudentOwner = async (req, res, next) => {
+  try {
+    const student = req.resource;
+    const userId = String(req.body.userId || "").trim();
+
+    if (!userId) {
+      student.ownerUser = null;
+      const updatedStudent = await student.save();
+      res.json(updatedStudent);
+      return;
+    }
+
+    const user = await User.findById(userId).select("role");
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    if (user.role !== "editor") {
+      res.status(400);
+      throw new Error("Only editor users can be linked to student profiles");
+    }
+
+    const existingOwnerProfile = await Student.findOne({
+      _id: { $ne: student._id },
+      ownerUser: user._id
+    });
+
+    if (existingOwnerProfile) {
+      res.status(409);
+      throw new Error("This editor is already linked to another student profile");
+    }
+
+    student.ownerUser = user._id;
     const updatedStudent = await student.save();
     res.json(updatedStudent);
   } catch (error) {

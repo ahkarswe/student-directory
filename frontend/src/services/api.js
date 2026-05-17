@@ -165,6 +165,15 @@ export const approveStudentProfile = (id) =>
     method: "PATCH"
   });
 
+export const assignStudentOwner = (id, userId) =>
+  request(`/students/${id}/owner`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ userId })
+  });
+
 export const deleteStudent = (id) =>
   request(`/students/${id}`, {
     method: "DELETE"

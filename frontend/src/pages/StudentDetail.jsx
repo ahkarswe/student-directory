@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ProfileStatusBadge from "../components/ProfileStatusBadge.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
-import { approveStudentProfile, deleteStudent, getStudent } from "../services/api.js";
+import { approveStudentProfile, assignStudentOwner, deleteStudent, getStudent, getUsers } from "../services/api.js";
+import { formatStudentId } from "../utils/studentId.js";
 
 function StudentDetail({ auth }) {
   const role = auth?.role;
@@ -14,14 +15,18 @@ function StudentDetail({ auth }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const studentId = student?.studentId || student?.rollNumber || "";
+  const [users, setUsers] = useState([]);
+  const [ownerUserId, setOwnerUserId] = useState("");
+  const studentId = formatStudentId(student?.studentId || student?.rollNumber);
 
   useEffect(() => {
     const loadStudent = async () => {
       try {
         setLoading(true);
         setError("");
-        setStudent(await getStudent(id));
+        const loadedStudent = await getStudent(id);
+        setStudent(loadedStudent);
+        setOwnerUserId(loadedStudent.ownerId || "");
       } catch (err) {
         setError(err.message);
       } finally {
@@ -31,6 +36,20 @@ function StudentDetail({ auth }) {
 
     loadStudent();
   }, [id]);
+
+  useEffect(() => {
+    if (!isSuperadmin) return;
+
+    const loadUsers = async () => {
+      try {
+        setUsers(await getUsers());
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    loadUsers();
+  }, [isSuperadmin]);
 
   const handleDelete = async () => {
     const confirmed = window.confirm(`Delete ${student.name}'s profile? This cannot be undone.`);
@@ -56,6 +75,19 @@ function StudentDetail({ auth }) {
     }
   };
 
+  const handleAssignOwner = async () => {
+    try {
+      setSaving(true);
+      const updated = await assignStudentOwner(id, ownerUserId);
+      setStudent(updated);
+      setOwnerUserId(updated.ownerId || "");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <p className="state-message">Loading profile...</p>;
   if (error) return <p className="state-message error-message">{error}</p>;
   if (!student) return <p className="state-message">Profile not found.</p>;
@@ -63,6 +95,9 @@ function StudentDetail({ auth }) {
   const work = student.work || {};
   const socialLinks = student.socialLinks || {};
   const canEditOwnProfile = canManageProfile || (role === "editor" && auth?.id === student.ownerId);
+  const department = student.department || student.depardment || work.department;
+  const editorUsers = users.filter((user) => user.role === "editor");
+  const ownerUser = users.find((user) => (user.id || user._id) === student.ownerId);
 
   return (
     <section className="page-section">
@@ -99,8 +134,11 @@ function StudentDetail({ auth }) {
           <div className="detail-grid">
             <DetailItem label="Email" value={student.email} />
             <DetailItem label="Phone" value={student.phone} />
-            <DetailItem label="Department" value={student.department} />
+            <DetailItem label="Department" value={department} />
             <DetailItem label="Batch" value={student.batch} />
+            {isSuperadmin && (
+              <DetailItem label="Linked account" value={ownerUser?.fullName || ownerUser?.username || student.ownerId} />
+            )}
             <DetailItem label="Location" value={work.location} />
             <DetailItem label="Experience" value={`${work.experienceYears || 0} years`} />
             <DetailItem label="Created" value={student.createdAt ? new Date(student.createdAt).toLocaleDateString() : ""} />
@@ -110,6 +148,28 @@ function StudentDetail({ auth }) {
             <div className="profile-actions">
               <button type="button" className="button button-primary" onClick={handleApprove} disabled={saving}>
                 {saving ? "Approving..." : "Approve profile"}
+              </button>
+            </div>
+          )}
+
+          {isSuperadmin && (
+            <div className="owner-assignment">
+              <label>
+                Linked editor account
+                <select value={ownerUserId} onChange={(event) => setOwnerUserId(event.target.value)}>
+                  <option value="">No linked account</option>
+                  {editorUsers.map((user) => {
+                    const userId = user.id || user._id;
+                    return (
+                      <option key={userId} value={userId}>
+                        {user.fullName || user.username} {user.email ? `(${user.email})` : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+              <button type="button" className="button button-secondary" onClick={handleAssignOwner} disabled={saving}>
+                {saving ? "Saving..." : "Save linked account"}
               </button>
             </div>
           )}

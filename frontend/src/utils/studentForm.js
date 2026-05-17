@@ -22,7 +22,7 @@ export const flattenStudent = (student) => ({
   email: student?.email || "",
   jobTitle: student?.work?.jobTitle || "",
   company: student?.work?.company || "",
-  department: student?.department || student?.work?.department || "",
+  department: student?.department || student?.depardment || student?.work?.department || "",
   batch: student?.batch || "",
   location: student?.work?.location || "",
   status: student?.work?.status || "Student",

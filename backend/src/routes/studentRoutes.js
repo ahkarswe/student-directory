@@ -1,6 +1,7 @@
 import express from "express";
 import {
   approveStudentProfile,
+  assignStudentOwner,
   createStudent,
   deleteStudent,
   getStudentById,
@@ -24,5 +25,6 @@ router
   .delete(requireRole("superadmin"), loadStudentResource, deleteStudent);
 
 router.patch("/:id/approve", requireRole("superadmin"), loadStudentResource, approveStudentProfile);
+router.patch("/:id/owner", requireRole("superadmin"), loadStudentResource, assignStudentOwner);
 
 export default router;

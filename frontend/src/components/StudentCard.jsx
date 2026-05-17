@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import ProfileStatusBadge from "./ProfileStatusBadge.jsx";
 import StatusBadge from "./StatusBadge.jsx";
+import { formatStudentId } from "../utils/studentId.js";
 
 function StudentCard({ student, auth, canDelete, onDelete }) {
   const work = student.work || {};
@@ -9,7 +10,8 @@ function StudentCard({ student, auth, canDelete, onDelete }) {
     auth?.role === "admin" ||
     auth?.role === "superadmin" ||
     (auth?.role === "editor" && auth?.id === student.ownerId);
-  const studentId = student.studentId || student.rollNumber;
+  const studentId = formatStudentId(student.studentId || student.rollNumber);
+  const department = student.department || student.depardment || work.department;
 
   return (
     <article className={`student-card ${work.status === "Full-time" ? "currently-employed" : ""}`}>
@@ -39,7 +41,7 @@ function StudentCard({ student, auth, canDelete, onDelete }) {
           {work.jobTitle || "Career details pending"}
           {work.company ? ` at ${work.company}` : ""}
         </p>
-        <p className="muted">{student.department ? `${student.department} · Batch ${student.batch || "N/A"}` : "Department not provided"}</p>
+        <p className="muted">{department ? `${department} · Batch ${student.batch || "N/A"}` : "Department not provided"}</p>
         <p className="muted">{work.location || "Location not provided"}</p>
         <div className="contact-line">
           <span>{student.phone || "Phone not provided"}</span>

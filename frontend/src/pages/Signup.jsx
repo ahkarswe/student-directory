@@ -7,6 +7,7 @@ function Signup({ onSignup }) {
     fullName: "",
     email: "",
     password: "",
+    verifyPassword: "",
     studentId: "",
     inviteCode: ""
   });
@@ -22,8 +23,15 @@ function Signup({ onSignup }) {
     setSaving(true);
     setError("");
 
+    if (values.password !== values.verifyPassword) {
+      setSaving(false);
+      setError("Passwords do not match");
+      return;
+    }
+
     try {
-      const auth = await signup(values);
+      const { verifyPassword, ...signupValues } = values;
+      const auth = await signup(signupValues);
       onSignup(auth);
     } catch (err) {
       setError(err.message);
@@ -68,8 +76,20 @@ function Signup({ onSignup }) {
               />
             </label>
             <label>
-              Student ID
-              <input name="studentId" value={values.studentId} onChange={updateValue} required />
+              Verify password
+              <input
+                name="verifyPassword"
+                value={values.verifyPassword}
+                onChange={updateValue}
+                type="password"
+                autoComplete="new-password"
+                minLength="8"
+                required
+              />
+            </label>
+            <label>
+              Student ID (Roll Number)
+              <input name="studentId" value={values.studentId} onChange={updateValue} required placeholder="1/mba-000" />
             </label>
             <label>
               Invite code

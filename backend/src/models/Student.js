@@ -53,6 +53,7 @@ const studentSchema = new mongoose.Schema(
       match: [/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email address is invalid"]
     },
     department: { type: String, trim: true, default: "" },
+    depardment: { type: String, trim: true, default: undefined },
     batch: { type: String, trim: true, default: "" },
     profileStatus: {
       type: String,
@@ -84,8 +85,10 @@ studentSchema.set("toJSON", {
   transform: (_doc, ret) => {
     ret.id = ret._id;
     ret.ownerId = ret.ownerUser?.toString() || null;
+    ret.department = ret.department || ret.depardment || ret.work?.department || "";
     delete ret.__v;
     delete ret.ownerUser;
+    delete ret.depardment;
     return ret;
   }
 });
